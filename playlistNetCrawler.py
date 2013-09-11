@@ -1,6 +1,7 @@
 import mechanize
 import cookielib
 import time
+import bs4
 
 AGENT_ALIASES = {
     'Mechanize' : "Mechanize/#{VERSION} Ruby/#{ruby_version} (http://github.com/sparklemotion/mechanize/)",
@@ -22,54 +23,71 @@ AGENT_ALIASES = {
     'Android' : 'Mozilla/5.0 (Linux; U; Android 3.0; en-us; Xoom Build/HRI39) AppleWebKit/534.13 (KHTML, like Gecko) Version/4.0 Safari/534.13'
 }
 
-genres = ['alternative','blues','classical','comedy','compilation','country','dance','disco','electronica','folk','heavy-metal','hip-hoprap','house','jazz','latin','pop','punk','rb','reggae','rock','soul','soundtrack','techno','world']
-moods = [ 'angry','chillout','cool','dark','dramatic','energetic','funny','futuristic','groovy','happy','intimate','party']
+class PlaylistNetCrawler():
+    br = None  # Main browser object
+    dbConnection = None
+    genres  = ['alternative','blues','classical','comedy','compilation','country','dance','disco','electronica','folk','heavy-metal','hip-hoprap','house','jazz','latin','pop','punk','rb','reggae','rock','soul','soundtrack','techno','world']
+    moods   = ['angry','chillout','cool','dark','dramatic','energetic','funny','futuristic','groovy','happy','intimate','party']
+    USERNAME = "raytrashmail@yahoo.com"
+    PASSWORD = "supermanfly"
+    nextPages = []
 
-#print AGENT_ALIASES['Windows IE 9']
+    def __init__(self):
+        self.br = mechanize.Browser()
+        # Cookie Jar
+        cj = cookielib.LWPCookieJar()
+        self.br.set_cookiejar(cj)
+        # Browser options
+        self.br.set_handle_equiv(True)
+        self.br.set_handle_gzip(True)
+        self.br.set_handle_redirect(True)
+        self.br.set_handle_referer(True)
+        self.br.set_handle_robots(False)
+        # Follows refresh 0 but not hangs on refresh > 0
+        self.br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 
-# Browser
-br = mechanize.Browser()
-
-# Cookie Jar
-cj = cookielib.LWPCookieJar()
-br.set_cookiejar(cj)
-
-# Browser options
-br.set_handle_equiv(True)
-br.set_handle_gzip(True)
-br.set_handle_redirect(True)
-br.set_handle_referer(True)
-br.set_handle_robots(False)
-
-# Follows refresh 0 but not hangs on refresh > 0
-br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
-
-# Want debugging messages?
-#br.set_debug_http(True)
-#br.set_debug_redirects(True)
-#br.set_debug_responses(True)
-
-# User-Agent (this is cheating, ok?)
-#br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
-br.addheaders = [('User-agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36')]
-r = br.open("http://playlists.net")
-html = r.read()
-#print html
-
-print 
-# print "		FORMS"
-# for f in br.forms():
-# 	print f
-
-time.sleep(1)
-br.select_form(nr=0)
-br.form['login_username'] = 'raytrashmail@yahoo.com'
-br.form['login_password'] = 'supermanfly'
-br.submit()
-
-time.sleep(1)
-br.open('http://playlists.net/new-releases')
-print br.response().read()
+        # Want debugging messages?
+        #br.set_debug_http(True)
+        #br.set_debug_redirects(True)
+        #br.set_debug_responses(True)
+        #br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+        self.br.addheaders = [('User-agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36')]
 
 
-class PlaylistNetCrawler
+
+    def scrapePage(url):
+        r = br.open(url)
+
+
+p = PlaylistNetCrawler()
+p.load
+
+
+# for genre in genres[:2]:
+#     r = br.open("http://playlists.net/playlist/"+genre)
+#     soup = bs4.BeautifulSoup(r.read())
+#     print soup.title.string, soup.p
+#     time.sleep(1)
+
+
+
+# r = br.open("http://playlists.net")
+# html = r.read()
+# #print html
+
+# print 
+# # print "		FORMS"
+# # for f in br.forms():
+# # 	print f
+
+# time.sleep(1)
+# br.select_form(nr=0)
+# br.form['login_username'] = USERNAME
+# br.form['login_password'] = PASSWORD
+# br.submit()
+
+# time.sleep(1)
+# br.open('http://playlists.net/new-releases')
+# print br.response().read()
+
+
