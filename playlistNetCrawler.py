@@ -30,7 +30,8 @@ class PlaylistNetCrawler():
     moods   = ['angry','chillout','cool','dark','dramatic','energetic','funny','futuristic','groovy','happy','intimate','party']
     USERNAME = "raytrashmail@yahoo.com"
     PASSWORD = "supermanfly"
-    nextPages = []
+    crawlQueue = []
+    completedPages = []
 
     def __init__(self):
         self.br = mechanize.Browser()
@@ -54,12 +55,48 @@ class PlaylistNetCrawler():
         self.br.addheaders = [('User-agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36')]
 
 
+    def crawlCategory(self):
+        for genre in self.genres[:1]:
+            self.crawlQueue.append("".join(("http://playlists.net/playlists/",genre,"/orderby/most-played")))
+            self.processCrawlQueue()
 
-    def scrapePage(url):
+    def processCrawlQueue(self):
+        while len(self.crawlQueue) >= 1:
+            url = self.crawlQueue.pop(0)
+
+            time.sleep(1)
+            r = self.br.open(url)
+            soup = bs4.BeautifulSoup(r.read())
+            print soup.title.string
+
+            #send url to scraper
+            #for item in range(playlist)
+                #scrapeList(item.targetURL)
+
+
+#         ul = soup.find_all('ul')
+#         for item in ul:
+#             if item.get("class"):
+#                 if 'playlists' in item.get('class'):
+#                     playlistURL = item.find_all('a')
+
+                    
+#                     for plurl in playlistURL:
+#                         if plurl.get('href'):
+#                             print "URL:",plurl.get('href')
+
+# #                    print item.a.get('href')
+                    #item.get('href')
+
+
+
+    def scrapePage(self,url):
         r = br.open(url)
 
 
 p = PlaylistNetCrawler()
+print
+p.crawlCategory()
 
 
 
