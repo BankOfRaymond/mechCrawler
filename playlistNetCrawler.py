@@ -60,7 +60,7 @@ class PlaylistNetCrawler():
 
 
 p = PlaylistNetCrawler()
-p.load
+
 
 
 # for genre in genres[:2]:
