@@ -28,8 +28,9 @@ class PlaylistNetCrawler():
     dbConnection = None
     genres  = ['alternative','blues','classical','comedy','compilation','country','dance','disco','electronica','folk','heavy-metal','hip-hoprap','house','jazz','latin','pop','punk','rb','reggae','rock','soul','soundtrack','techno','world']
     moods   = ['angry','chillout','cool','dark','dramatic','energetic','funny','futuristic','groovy','happy','intimate','party']
-    USERNAME = "raytrashmail@yahoo.com"
-    PASSWORD = "supermanfly"
+    #USERNAME = "raytrashmail@yahoo.com"
+    #PASSWORD = "supermanfly"
+    baseURL = "http://playlists.net"
     crawlQueue = []
     completedPages = []
 
@@ -57,41 +58,64 @@ class PlaylistNetCrawler():
 
     def crawlCategory(self):
         for genre in self.genres[:1]:
-            self.crawlQueue.append("".join(("http://playlists.net/playlists/",genre,"/orderby/most-played")))
+            self.crawlQueue.append("".join(("/playlists/",genre,"/page/1/orderby/most-played")))
             self.processCrawlQueue()
 
     def processCrawlQueue(self):
         while len(self.crawlQueue) >= 1:
+
+            print 
+            print "Crawl Queue",self.crawlQueue
+            print "Completed Pages",self.completedPages
+
             url = self.crawlQueue.pop(0)
-
+            self.completedPages.append(url)
             time.sleep(1)
-            r = self.br.open(url)
+            r = self.br.open(self.baseURL+url)
             soup = bs4.BeautifulSoup(r.read())
-            print soup.title.string
+            
+            #Gets playlists on page
+            # ul = soup.find_all('ul')
+            # for item in ul:
+            #     if item.get("class"):
+            #         if 'playlists' in item.get('class'):
+            #             playlistURL = item.find_all('a')
+            #             for plurl in playlistURL:
+            #                 if plurl.get('href'):
+            #                     True
+            #                     #print "URL:",plurl.get('href')
 
-            #send url to scraper
-            #for item in range(playlist)
-                #scrapeList(item.targetURL)
-
-
-#         ul = soup.find_all('ul')
-#         for item in ul:
-#             if item.get("class"):
-#                 if 'playlists' in item.get('class'):
-#                     playlistURL = item.find_all('a')
-
-                    
-#                     for plurl in playlistURL:
-#                         if plurl.get('href'):
-#                             print "URL:",plurl.get('href')
-
-# #                    print item.a.get('href')
-                    #item.get('href')
+            #Sends the "Pagination" section of playlists.net to addPages to Queue,
+            self.addPagesToQueue(soup.find_all('div'))
 
 
+
+    '''
+    Takes in the "pagination" section from the html on playlists.net 
+    addes new pages to self.crawlQueue, as long as new URL is not located in completedPages or crawlQueue
+    '''
+    def addPagesToQueue(self,soupObj):
+        for item in soupObj:
+            if item.get("class"):
+                if "paging" in item.get("class"):
+                    nextPages = item.find_all("a")
+                    for np in nextPages:
+                        if "Last" not in np.text.encode("utf-8"):
+                            toAddURL = np.get("href")
+                            if toAddURL not in self.completedPages and toAddURL not in self.crawlQueue:
+                                #print "Added Page:",toAddURL
+                                self.crawlQueue.append(toAddURL)
 
     def scrapePage(self,url):
-        r = br.open(url)
+        
+            # for item in ul:
+            #     if item.get("class"):
+            #         if 'playlists' in item.get('class'):
+            #             playlistURL = item.find_all('a')
+            #             for plurl in playlistURL:
+            #                 if plurl.get('href'):
+            #                     True
+            #                     #print "URL:",plurl.get('href')
 
 
 p = PlaylistNetCrawler()
@@ -100,31 +124,7 @@ p.crawlCategory()
 
 
 
-# for genre in genres[:2]:
-#     r = br.open("http://playlists.net/playlist/"+genre)
-#     soup = bs4.BeautifulSoup(r.read())
-#     print soup.title.string, soup.p
-#     time.sleep(1)
 
-
-
-# r = br.open("http://playlists.net")
-# html = r.read()
-# #print html
-
-# print 
-# # print "		FORMS"
-# # for f in br.forms():
-# # 	print f
-
-# time.sleep(1)
-# br.select_form(nr=0)
-# br.form['login_username'] = USERNAME
-# br.form['login_password'] = PASSWORD
-# br.submit()
-
-# time.sleep(1)
-# br.open('http://playlists.net/new-releases')
-# print br.response().read()
-
-
+            # print 
+            # print "Crawl Queue",self.crawlQueue
+            # print "Completed Pages",self.completedPages
