@@ -34,10 +34,11 @@ class PlaylistNetCrawler():
     crawlQueue = []
     completedPages = []
 
-    '''
-    Initialized cookiejar, and browser object
-    '''
+
     def __init__(self):
+        '''
+        Initialized cookiejar, and browser object
+        '''
         self.br = mechanize.Browser()
         # Cookie Jar
         cj = cookielib.LWPCookieJar()
@@ -59,21 +60,23 @@ class PlaylistNetCrawler():
         self.br.addheaders = [('User-agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36')]
 
 
-    '''
-    Loads up the initial pages from the genres/moods, appends them to crawlQueue 
-    '''
+
     def crawlCategory(self):
+        '''
+        Loads up the initial pages from the genres/moods, appends them to crawlQueue 
+        '''
         for genre in self.genres[:1]:
             self.crawlQueue.append("".join(("/playlists/",genre,"/page/1/orderby/most-played")))
             self.processCrawlQueue()
 
 
-    '''
-    While loop, which continues until crawlQueue is empty. This method calls addPagesToQueue , and loadPlaylistURL
-    sends the playlist URL on page, to the page scraper, and then after all done, adds more pages"if any" to crawlQueue
-    Also adds to completed pages.
-    '''
+
     def processCrawlQueue(self):
+        '''
+        While loop, which continues until crawlQueue is empty. This method calls addPagesToQueue , and loadPlaylistURL
+        sends the playlist URL on page, to the page scraper, and then after all done, adds more pages"if any" to crawlQueue
+        Also adds to completed pages.
+        '''
         while len(self.crawlQueue) >= 1:
             print 
             print "Crawl Queue",self.crawlQueue
@@ -91,11 +94,12 @@ class PlaylistNetCrawler():
             #Sends the "Pagination" section of playlists.net to addPages to Queue,
             self.addPagesToQueue(soup.find_all('div'))
 
-    '''
-    Takes in the "pagination" section from the html on playlists.net 
-    addes new pages to self.crawlQueue, as long as new URL is not located in completedPages or crawlQueue
-    '''
+   
     def addPagesToQueue(self,soupObj):
+        '''
+        Takes in the "pagination" section from the html on playlists.net 
+        addes new pages to self.crawlQueue, as long as new URL is not located in completedPages or crawlQueue
+        '''
         for item in soupObj:
             if item.get("class"):
                 if "paging" in item.get("class"):
@@ -107,37 +111,38 @@ class PlaylistNetCrawler():
                                 #print "Added Page:",toAddURL
                                 self.crawlQueue.append(toAddURL)
 
-    '''
-    Takes in the "playlist" section of a page, and starts segregating the playlists
-    '''
+    
     def loadPlaylistURL(self,soupObj):
+        '''
+        Takes in the "playlist" section of a page, and starts segregating the playlists
+        '''
         for item in soupObj:
             if item.get("class"):
                 if 'playlists' in item.get('class'):
                     playlistURL = item.find_all('a')
                     for plurl in playlistURL:
                         if plurl.get('href'):
-                            self.scrapePage(plurl.get('href'))
+                            self.getSpotifyPlaylistInfo(plurl.get('href'))
 
-    '''
-    scrapes the page and gets necessary information, sends to DB controller
-    '''
-    def scrapePage(self,url):
+
+    def getSpotifyPlaylistInfo(self,url):
+        '''
+        scrapes the page and gets necessary information, sends to DB controller
+        '''
         time.sleep(1)
         print url
         r = self.br.open(self.baseURL+"/"+url)
         soup = bs4.BeautifulSoup(r.read())
-        print soup
+        results = soup.find_all("a")
+        for tag in results:
+            if "data-desktop-uri" in tag.attrs:
+                link = tag.attrs["data-desktop-uri"].encode("utf-8").split("%253A")
+                spotifyUser = link[link.index("user")+1]
+                spotifyPlaylist = link[link.index("playlist")+1]
+                print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
 
 
 
 p = PlaylistNetCrawler()
-print
 p.crawlCategory()
 
-
-
-
-            # print 
-            # print "Crawl Queue",self.crawlQueue
-            # print "Completed Pages",self.completedPages

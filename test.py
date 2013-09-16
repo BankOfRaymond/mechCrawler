@@ -6,7 +6,7 @@ import time
 
 
 url = "http://playlists.net/indie-feel-good"
-url = "http://playlists.net/elephantine-the-best-elephant-6-single"
+#url = "http://playlists.net/elephantine-the-best-elephant-6-single"
 USERNAME = "raytrashmail@yahoo.com"        #Not used, can scrape without login
 PASSWORD = "supermanfly"
 
@@ -45,8 +45,10 @@ results = soup.find_all("a")
 for tag in results:
 	
 	if "data-desktop-uri" in tag.attrs:
-		print tag
-		print "	",tag.attrs #["data-desktop-uri"]
+		link = tag.attrs["data-desktop-uri"].encode("utf-8").split("%253A")
+		spotifyUser = link[link.index("user")+1]
+		spotifyPlaylist = link[link.index("playlist")+1]
+		print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
 
 
 	# if hasattr(tag,'data-desktop-uri'):
