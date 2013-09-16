@@ -69,8 +69,6 @@ class PlaylistNetCrawler():
             self.crawlQueue.append("".join(("/playlists/",genre,"/page/1/orderby/most-played")))
             self.processCrawlQueue()
 
-
-
     def processCrawlQueue(self):
         '''
         While loop, which continues until crawlQueue is empty. This method calls addPagesToQueue , and loadPlaylistURL
@@ -139,8 +137,36 @@ class PlaylistNetCrawler():
                 link = tag.attrs["data-desktop-uri"].encode("utf-8").split("%253A")
                 spotifyUser = link[link.index("user")+1]
                 spotifyPlaylist = link[link.index("playlist")+1]
-                print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
+                self.scrapeSpotifyPlaylist(spotifyUser,spotifyPlaylist)
+                #print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
 
+    def scrapeSpotifyPlaylist(self,spotifyUser,spotifyPlaylist):
+        time.sleep(1)
+        print spotifyUser,spotifyPlaylist
+        
+        
+        url = "".join(("https://embed.spotify.com/?uri=spotify:user:",spotifyUser,":playlist:",spotifyPlaylist))
+
+        r = self.br.open(url)
+        print url
+        soup = bs4.BeautifulSoup(self.br.response().read())
+        results = soup.find_all("ul")
+        for tag in results:
+            if "class" in tag.attrs:
+                trackInfo = tag.children
+                trackTitle = ''
+                artist = ''
+                order = 0
+                for track in trackInfo:
+                    if isinstance(track,bs4.element.Tag):
+                        if "track-title" in track['class']:
+                            trackTitle = track.string
+                            order = trackTitle[0:trackTitle.find(".")]
+                            trackTitle = trackTitle[trackTitle.find(".")+2:].encode("utf-8")
+                            
+                        elif "artist" in track['class']:
+                            artist = track.string.encode("utf-8")
+                print trackTitle, artist, "Source: Spotify", spotifyUser, spotifyPlaylist,order     
 
 
 p = PlaylistNetCrawler()

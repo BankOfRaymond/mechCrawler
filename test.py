@@ -1,8 +1,8 @@
 import bs4
-import urllib2
+#import urllib2
 import mechanize
 import cookielib
-import time
+#import time
 
 
 url = "http://playlists.net/indie-feel-good"
@@ -32,32 +32,52 @@ br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
 br.addheaders = [('User-agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36')]
 
 
+'''
+Crawling page to get spotify user and spotify playlist
+'''
+# r = br.open(url)
+# br.select_form(nr=0)
+# br.form['login_username'] = USERNAME
+# br.form['login_password'] = PASSWORD
+# br.submit()
+# 
+# 
+# soup = bs4.BeautifulSoup(br.response().read())
+# 
+# results = soup.find_all("a")
+# for tag in results:
+# 	
+# 	if "data-desktop-uri" in tag.attrs:
+# 		link = tag.attrs["data-desktop-uri"].encode("utf-8").split("%253A")
+# 		spotifyUser = link[link.index("user")+1]
+# 		spotifyPlaylist = link[link.index("playlist")+1]
+# 		print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
+
+spotifyUser = "napstersean"
+spotifyPlaylist = "3vxotOnOGDlZXyzJPLFnm2"
+
+url = "".join(("https://embed.spotify.com/?uri=spotify:user:",spotifyUser,":playlist:",spotifyPlaylist))
+
 r = br.open(url)
-br.select_form(nr=0)
-br.form['login_username'] = USERNAME
-br.form['login_password'] = PASSWORD
-br.submit()
-
-
+print url
 soup = bs4.BeautifulSoup(br.response().read())
-
-results = soup.find_all("a")
+results = soup.find_all("ul")
 for tag in results:
-	
-	if "data-desktop-uri" in tag.attrs:
-		link = tag.attrs["data-desktop-uri"].encode("utf-8").split("%253A")
-		spotifyUser = link[link.index("user")+1]
-		spotifyPlaylist = link[link.index("playlist")+1]
-		print "User: ",spotifyUser, "Playlist: ",spotifyPlaylist
+	if "class" in tag.attrs:
+		trackInfo = tag.children
+		trackTitle = ''
+		artist = ''
+		order = 0
+		for track in trackInfo:
+			if isinstance(track,bs4.element.Tag):
+				if "track-title" in track['class']:
+					trackTitle = track.string
+					order = trackTitle[0:trackTitle.find(".")]
+					trackTitle = trackTitle[trackTitle.find(".")+2:]
+					
+				elif "artist" in track['class']:
+					artist = track.string
+		print trackTitle, artist, "Source: Spotify", spotifyUser, spotifyPlaylist,order 	 
 
 
-	# if hasattr(tag,'data-desktop-uri'):
-	# 	print tag['data-desktop-uri']
-	
 
-
-		# if "data-desktop-uri" in item:
-	# 	print item
-
-#https://embed.spotify.com/?uri=spotify:user:sharemyplaylists.com:playlist:07L7cbykHde1pmQlrtVu3B&theme=white
-#spotify:app:playlists-net:page:index:section:subscribe:playlist:spotify%253Auser%253A1125484906%253Aplaylist%253A0lJUE3QvHjzlVTW22DzdPi
