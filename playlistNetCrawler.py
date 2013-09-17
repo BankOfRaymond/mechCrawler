@@ -147,7 +147,7 @@ class PlaylistNetCrawler():
         
         url = "".join(("https://embed.spotify.com/?uri=spotify:user:",spotifyUser,":playlist:",spotifyPlaylist))
 
-        r = self.br.open(url)
+        self.br.open(url)
         print url
         soup = bs4.BeautifulSoup(self.br.response().read())
         results = soup.find_all("ul")
